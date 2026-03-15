@@ -17,7 +17,6 @@ export default function AddEditEmployeePage() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [isDirty, setIsDirty] = useState(false);
-  const [selectedCafeId, setSelectedCafeId] = useState(null);
 
   const { allowNavigation } = useUnsavedChanges(isDirty);
 
@@ -48,21 +47,13 @@ export default function AddEditEmployeePage() {
         phone_number: employeeData.phone_number,
         gender: employeeData.gender,
         cafe_id: matchedCafe?.id || null,
+        start_date: employeeData.start_date ? dayjs(employeeData.start_date).format('YYYY-MM-DD') : null,
       });
-      setSelectedCafeId(matchedCafe?.id || null);
       setIsDirty(false);
     }
   }, [employeeData, cafes, form, isEditing]);
 
-  const handleValuesChange = (changed) => {
-    setIsDirty(true);
-    if ('cafe_id' in changed) {
-      setSelectedCafeId(changed.cafe_id || null);
-      if (!changed.cafe_id) {
-        form.setFieldValue('start_date', undefined);
-      }
-    }
-  };
+  const handleValuesChange = () => setIsDirty(true);
 
   const handleSubmit = async (values) => {
     const payload = {
@@ -70,8 +61,8 @@ export default function AddEditEmployeePage() {
       email_address: values.email_address,
       phone_number: values.phone_number,
       gender: values.gender,
-      cafe_id: values.cafe_id || null,
-      start_date: values.start_date ? dayjs(values.start_date).format('YYYY-MM-DD') : null,
+      cafe_id: values.cafe_id,
+      start_date: dayjs(values.start_date).format('YYYY-MM-DD'),
     };
 
     if (isEditing) {
@@ -180,47 +171,44 @@ export default function AddEditEmployeePage() {
             </Radio.Group>
           </Form.Item>
 
-          <Form.Item name="cafe_id" label="Assigned Café (optional)">
+          <Form.Item
+            name="cafe_id"
+            label="Assigned Café"
+            rules={[{ required: true, message: 'Café assignment is required' }]}
+          >
             <Select
               placeholder="Select a café..."
               options={cafeOptions}
-              allowClear
               showSearch
               optionFilterProp="label"
               style={{ maxWidth: 400 }}
             />
           </Form.Item>
 
-          {selectedCafeId && (
-            <Form.Item
-              name="start_date"
-              label="Start Date"
-              rules={[
-                {
-                  required: Boolean(selectedCafeId),
-                  message: 'Start date is required when assigning a café',
-                },
-              ]}
-            >
-              <input
-                type="date"
-                max={new Date().toISOString().split('T')[0]}
-                style={{
-                  border: '1px solid #d9d9d9',
-                  borderRadius: 8,
-                  padding: '4px 12px',
-                  fontSize: 14,
-                  color: '#1a1008',
-                  outline: 'none',
-                  width: 200,
-                }}
-                onChange={(e) => {
-                  form.setFieldValue('start_date', e.target.value);
-                  setIsDirty(true);
-                }}
-              />
-            </Form.Item>
-          )}
+          <Form.Item
+            name="start_date"
+            label="Start Date"
+            rules={[{ required: true, message: 'Start date is required' }]}
+            getValueProps={(v) => ({ value: v || '' })}
+          >
+            <input
+              type="date"
+              max={new Date().toISOString().split('T')[0]}
+              style={{
+                border: '1px solid #d9d9d9',
+                borderRadius: 8,
+                padding: '4px 12px',
+                fontSize: 14,
+                color: '#1a1008',
+                outline: 'none',
+                width: 200,
+              }}
+              onChange={(e) => {
+                form.setFieldValue('start_date', e.target.value);
+                setIsDirty(true);
+              }}
+            />
+          </Form.Item>
 
           <Form.Item className="mt-6">
             <div className="flex gap-3">

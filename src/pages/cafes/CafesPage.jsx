@@ -148,7 +148,7 @@ export default function CafesPage() {
 
   const columnDefs = useMemo(
     () => [
-      { headerName: 'Logo', field: 'logo', minWidth: 100, sortable: false, filter: false, cellRenderer: LogoCell },
+      { headerName: 'Logo', field: 'logo', minWidth: 120, width: 120, sortable: false, filter: false, cellRenderer: LogoCell },
       { headerName: 'Name', field: 'name', flex: 1, minWidth: 120 },
       {
         headerName: 'Description',
