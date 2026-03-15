@@ -19,7 +19,7 @@ export default function AddEditEmployeePage() {
   const [isDirty, setIsDirty] = useState(false);
   const [selectedCafeId, setSelectedCafeId] = useState(null);
 
-  useUnsavedChanges(isDirty);
+  const { allowNavigation } = useUnsavedChanges(isDirty);
 
   const { mutate: createEmployee, isPending: isCreating } = useCreateEmployee();
   const { mutate: updateEmployee, isPending: isUpdating } = useUpdateEmployee();
@@ -80,6 +80,7 @@ export default function AddEditEmployeePage() {
         {
           onSuccess: () => {
             message.success('Employee updated successfully');
+            allowNavigation();
             setIsDirty(false);
             navigate('/employees');
           },
@@ -90,6 +91,7 @@ export default function AddEditEmployeePage() {
       createEmployee(payload, {
         onSuccess: () => {
           message.success('Employee created successfully');
+          allowNavigation();
           setIsDirty(false);
           navigate('/employees');
         },
@@ -118,7 +120,7 @@ export default function AddEditEmployeePage() {
 
   return (
     <div className="page-container">
-      <div className="page-header">
+      <div className="form-page-header">
         <h1 className="page-title">{isEditing ? 'Edit Employee' : 'Add New Employee'}</h1>
       </div>
 

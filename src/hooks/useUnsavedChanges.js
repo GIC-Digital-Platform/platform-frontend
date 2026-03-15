@@ -1,18 +1,24 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { Modal } from 'antd';
 
 /**
- * Warns the user with a confirmation modal when navigating away
- * while there are unsaved form changes.
+ * Warns the user when navigating away with unsaved changes.
+ * Returns `allowNavigation` — call it synchronously before navigate()
+ * on a successful save to skip the blocker.
  *
  * @param {boolean} isDirty - Whether the form has unsaved changes
  */
 export function useUnsavedChanges(isDirty) {
-  // Block navigation when the form is dirty
+  const bypassRef = useRef(false);
+
+  const allowNavigation = useCallback(() => {
+    bypassRef.current = true;
+  }, []);
+
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      isDirty && currentLocation.pathname !== nextLocation.pathname,
+      isDirty && !bypassRef.current && currentLocation.pathname !== nextLocation.pathname,
   );
 
   const confirmNavigation = useCallback(() => {
@@ -35,10 +41,9 @@ export function useUnsavedChanges(isDirty) {
     }
   }, [blocker.state, confirmNavigation]);
 
-  // Also warn on browser close/refresh
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (isDirty) {
+      if (isDirty && !bypassRef.current) {
         e.preventDefault();
         e.returnValue = '';
       }
@@ -46,4 +51,6 @@ export function useUnsavedChanges(isDirty) {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
+
+  return { allowNavigation };
 }

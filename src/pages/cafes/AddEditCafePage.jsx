@@ -20,13 +20,12 @@ export default function AddEditCafePage() {
   const [isDirty, setIsDirty] = useState(false);
   const [fileList, setFileList] = useState([]);
 
-  useUnsavedChanges(isDirty);
+  const { allowNavigation } = useUnsavedChanges(isDirty);
 
   const { mutate: createCafe, isPending: isCreating } = useCreateCafe();
   const { mutate: updateCafe, isPending: isUpdating } = useUpdateCafe();
   const isSaving = isCreating || isUpdating;
 
-  // Fetch all cafes then find the one with matching id
   const { data: cafeData, isLoading: isLoadingCafe, isError } = useQuery({
     queryKey: ['cafe-edit', id],
     queryFn: () => getCafes(),
@@ -81,6 +80,7 @@ export default function AddEditCafePage() {
         {
           onSuccess: () => {
             message.success('Café updated successfully');
+            allowNavigation();
             setIsDirty(false);
             navigate('/cafes');
           },
@@ -91,6 +91,7 @@ export default function AddEditCafePage() {
       createCafe(formData, {
         onSuccess: () => {
           message.success('Café created successfully');
+          allowNavigation();
           setIsDirty(false);
           navigate('/cafes');
         },
@@ -117,7 +118,7 @@ export default function AddEditCafePage() {
 
   return (
     <div className="page-container">
-      <div className="page-header">
+      <div className="form-page-header">
         <h1 className="page-title">{isEditing ? 'Edit Café' : 'Add New Café'}</h1>
       </div>
 
@@ -172,8 +173,8 @@ export default function AddEditCafePage() {
               <Button icon={<UploadOutlined />}>Upload Logo (max 2MB)</Button>
             </Upload>
             {isEditing && cafeData?.logo && fileList.length === 0 && (
-              <div className="mt-2 text-sm" style={{ color: '#6f4e37' }}>
-                Current logo: <code>{cafeData.logo}</code>
+              <div className="mt-2">
+                <img src={cafeData.logo} alt="current logo" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8, border: '1px solid #e5e7eb' }} />
               </div>
             )}
           </Form.Item>

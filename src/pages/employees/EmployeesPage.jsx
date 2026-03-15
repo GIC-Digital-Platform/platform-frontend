@@ -57,7 +57,6 @@ export default function EmployeesPage() {
       (e) =>
         e.name?.toLowerCase().includes(q) ||
         e.id?.toLowerCase().includes(q) ||
-        e.email_address?.toLowerCase().includes(q) ||
         e.cafe?.toLowerCase().includes(q),
     );
   }, [employees, searchText]);
