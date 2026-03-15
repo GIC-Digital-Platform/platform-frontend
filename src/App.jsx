@@ -1,89 +1,99 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, NavLink, useLocation } from 'react-router-dom';
-import { Layout, Menu } from 'antd';
+import { createBrowserRouter, RouterProvider, Outlet, Navigate, NavLink, useLocation } from 'react-router-dom';
+import { Layout } from 'antd';
+import {
+  CoffeeOutlined,
+  TeamOutlined,
+  ShopFilled,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+} from '@ant-design/icons';
 import CafesPage from './pages/cafes/CafesPage';
 import AddEditCafePage from './pages/cafes/AddEditCafePage';
 import EmployeesPage from './pages/employees/EmployeesPage';
 import AddEditEmployeePage from './pages/employees/AddEditEmployeePage';
 
-const { Sider, Content, Header } = Layout;
+const { Sider, Content } = Layout;
+
+const NAV_ITEMS = [
+  { key: 'cafes', to: '/cafes', icon: <ShopFilled />, label: 'Cafes' },
+  { key: 'employees', to: '/employees', icon: <TeamOutlined />, label: 'Employees' },
+];
 
 function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-
-  const selectedKey = location.pathname.startsWith('/employees') ? 'employees' : 'cafes';
-
-  const menuItems = [
-    {
-      key: 'cafes',
-      icon: <span style={{ fontSize: 16 }}>☕</span>,
-      label: <NavLink to="/cafes">Cafés</NavLink>,
-    },
-    {
-      key: 'employees',
-      icon: <span style={{ fontSize: 16 }}>👥</span>,
-      label: <NavLink to="/employees">Employees</NavLink>,
-    },
-  ];
+  const activeKey = location.pathname.startsWith('/employees') ? 'employees' : 'cafes';
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider
-        collapsible
+        width={240}
+        collapsedWidth={64}
         collapsed={collapsed}
-        onCollapse={setCollapsed}
-        style={{ background: '#3d2b1f' }}
-        width={220}
+        className="app-sidebar"
       >
-        <div className="sidebar-logo">
-          <span>☕</span>
-          {!collapsed && <span>Café Manager</span>}
+        {/* Header */}
+        <div className="sidebar-brand" style={{ flexDirection: 'column', alignItems: collapsed ? 'center' : 'flex-start' }}>
+          <div className="sidebar-brand-icon">
+            <CoffeeOutlined style={{ fontSize: 20, color: '#fff' }} />
+          </div>
+          {!collapsed && (
+            <div>
+              <div className="sidebar-brand-name">Café Employee</div>
+              <div className="sidebar-brand-sub">MANAGEMENT SYSTEM</div>
+            </div>
+          )}
         </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          items={menuItems}
-          style={{ background: 'transparent', marginTop: 8 }}
-        />
+
+        {/* Page Navigation */}
+        <nav className="sidebar-nav">
+          {NAV_ITEMS.map(({ key, to, icon, label }) => (
+            <NavLink
+              key={key}
+              to={to}
+              title={collapsed ? label : undefined}
+              className={`sidebar-nav-item ${activeKey === key ? 'active' : ''} ${collapsed ? 'collapsed' : ''}`}
+            >
+              <span className="sidebar-nav-icon">{icon}</span>
+              {!collapsed && <span>{label}</span>}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Collapse toggle */}
+        <div className="sidebar-toggle" onClick={() => setCollapsed(!collapsed)}>
+          {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          {!collapsed && <span>Collapse</span>}
+        </div>
       </Sider>
 
-      <Layout>
-        <Header
-          style={{
-            background: '#ffffff',
-            padding: '0 24px',
-            borderBottom: '1px solid #e8d5be',
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <span style={{ color: '#6f4e37', fontWeight: 600, fontSize: '1rem' }}>
-            {selectedKey === 'cafes' ? '☕ Café Management' : '👥 Employee Management'}
-          </span>
-        </Header>
-        <Content style={{ background: '#fdf8f0' }}>
-          <Routes>
-            <Route path="/" element={<Navigate to="/cafes" replace />} />
-            <Route path="/cafes" element={<CafesPage />} />
-            <Route path="/cafes/new" element={<AddEditCafePage />} />
-            <Route path="/cafes/edit/:id" element={<AddEditCafePage />} />
-            <Route path="/employees" element={<EmployeesPage />} />
-            <Route path="/employees/new" element={<AddEditEmployeePage />} />
-            <Route path="/employees/edit/:id" element={<AddEditEmployeePage />} />
-            <Route path="*" element={<Navigate to="/cafes" replace />} />
-          </Routes>
+      <Layout style={{ background: '#f5f2ef' }}>
+        <Content style={{ background: '#f5f2ef' }}>
+          <Outlet />
         </Content>
       </Layout>
     </Layout>
   );
 }
 
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <AppLayout />,
+    children: [
+      { index: true, element: <Navigate to="/cafes" replace /> },
+      { path: 'cafes', element: <CafesPage /> },
+      { path: 'cafes/new', element: <AddEditCafePage /> },
+      { path: 'cafes/edit/:id', element: <AddEditCafePage /> },
+      { path: 'employees', element: <EmployeesPage /> },
+      { path: 'employees/new', element: <AddEditEmployeePage /> },
+      { path: 'employees/edit/:id', element: <AddEditEmployeePage /> },
+      { path: '*', element: <Navigate to="/cafes" replace /> },
+    ],
+  },
+]);
+
 export default function App() {
-  return (
-    <BrowserRouter>
-      <AppLayout />
-    </BrowserRouter>
-  );
+  return <RouterProvider router={router} />;
 }

@@ -3,7 +3,6 @@ import api from './axiosInstance';
 export const getCafes = async (location = '') => {
   const params = location ? { location } : {};
   const { data } = await api.get('/cafes', { params });
-  console.log("data.data");
   return data.data;
 };
 

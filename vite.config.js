@@ -21,6 +21,11 @@ export default defineConfig({
         },
       },
       '/uploads': { target: 'http://localhost:4000', changeOrigin: true },
+      '/api-gov': {
+        target: 'https://api-open.data.gov.sg',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-gov/, ''),
+      },
     },
   },
 });
