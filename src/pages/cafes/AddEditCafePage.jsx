@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Button, Upload, Card, message, Spin, Alert } from 'antd';
+import { Form, Button, Upload, Card, message, Spin, Alert, Select } from 'antd';
 import { UploadOutlined, SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 
@@ -8,6 +8,7 @@ import AppTextInput from '../../components/common/AppTextInput';
 import { useCreateCafe, useUpdateCafe } from '../../hooks/useCafes';
 import { useUnsavedChanges } from '../../hooks/useUnsavedChanges';
 import { getCafes } from '../../api/cafeApi';
+import { useSingaporePlanningAreas } from '../../hooks/useSingaporePlanningAreas';
 
 const MAX_FILE_SIZE_MB = 2;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -19,6 +20,30 @@ export default function AddEditCafePage() {
   const [form] = Form.useForm();
   const [isDirty, setIsDirty] = useState(false);
   const [fileList, setFileList] = useState([]);
+  const [locationRegion, setLocationRegion] = useState(null);
+
+  const { data: planningAreas = [] } = useSingaporePlanningAreas();
+
+  const regions = useMemo(
+    () => [...new Set(planningAreas.map((p) => p.REGION_N).filter(Boolean))].sort(),
+    [planningAreas],
+  );
+
+  const areasByRegion = useMemo(() => {
+    const map = {};
+    planningAreas.forEach(({ PLN_AREA_N, REGION_N }) => {
+      if (!map[REGION_N]) map[REGION_N] = [];
+      map[REGION_N].push(PLN_AREA_N);
+    });
+    return map;
+  }, [planningAreas]);
+
+  const areaOptions = useMemo(() => {
+    const source = locationRegion
+      ? areasByRegion[locationRegion] ?? []
+      : planningAreas.map((p) => p.PLN_AREA_N);
+    return [...new Set(source)].sort().map((a) => ({ value: a, label: toTitleCase(a) }));
+  }, [locationRegion, planningAreas, areasByRegion]);
 
   const { allowNavigation } = useUnsavedChanges(isDirty);
 
@@ -40,9 +65,18 @@ export default function AddEditCafePage() {
         description: cafeData.description,
         location: cafeData.location,
       });
+      if (cafeData.location) {
+        const match = planningAreas.find(
+          (p) => p.PLN_AREA_N?.toUpperCase() === cafeData.location?.toUpperCase(),
+        );
+        if (match) {
+          setLocationRegion(match.REGION_N);
+          form.setFieldValue('location', toTitleCase(match.PLN_AREA_N));
+        }
+      }
       setIsDirty(false);
     }
-  }, [cafeData, form, isEditing]);
+  }, [cafeData, form, isEditing, planningAreas]);
 
   const handleValuesChange = () => setIsDirty(true);
 
@@ -68,7 +102,7 @@ export default function AddEditCafePage() {
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('description', values.description);
-    formData.append('location', values.location);
+    formData.append('location', toTitleCase(values.location));
 
     if (fileList.length > 0 && fileList[0].originFileObj) {
       formData.append('logo', fileList[0].originFileObj);
@@ -154,12 +188,32 @@ export default function AddEditCafePage() {
             ]}
           />
 
-          <AppTextInput
-            name="location"
-            label="Location"
-            placeholder="e.g. Orchard, Marina Bay"
-            rules={[{ required: true, message: 'Location is required' }]}
-          />
+          <Form.Item label="Location">
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Select
+                placeholder="Filter by region..."
+                style={{ width: '40%' }}
+                value={locationRegion}
+                onChange={(val) => {
+                  setLocationRegion(val || null);
+                  form.setFieldValue('location', null);
+                  setIsDirty(true);
+                }}
+                allowClear
+                options={regions.map((r) => ({ value: r, label: toTitleCase(r) }))}
+              />
+              <Form.Item name="location" noStyle rules={[{ required: true, message: 'Location is required' }]}>
+                <Select
+                  placeholder="Select an area..."
+                  style={{ width: '60%' }}
+                  showSearch
+                  optionFilterProp="label"
+                  allowClear
+                  options={areaOptions}
+                />
+              </Form.Item>
+            </div>
+          </Form.Item>
 
           <Form.Item label="Logo" name="logo">
             <Upload
@@ -203,4 +257,8 @@ export default function AddEditCafePage() {
       </Card>
     </div>
   );
+}
+
+function toTitleCase(str = '') {
+  return str.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }

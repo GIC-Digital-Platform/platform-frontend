@@ -63,13 +63,36 @@ export default function CafesPage() {
     return map;
   }, [planningAreas]);
 
+  const { data: cafes = [], isLoading, isError, error } = useGetCafes('');
+  const { mutate: deleteCafe, isPending: isDeleting } = useDeleteCafe();
+
+  const cafeCountByLocation = useMemo(() => {
+    const map = {};
+    cafes.forEach((c) => {
+      const loc = c.location?.toUpperCase();
+      if (loc) {
+        map[loc] = (map[loc] || 0) + 1;
+      }
+    });
+    return map;
+  }, [cafes]);
+
+  const cafeCountByRegion = useMemo(() => {
+    const map = {};
+    regions.forEach((r) => {
+      const areas = areasByRegion[r] ?? [];
+      map[r] = areas.reduce((sum, area) => sum + (cafeCountByLocation[area.toUpperCase()] || 0), 0);
+    });
+    return map;
+  }, [regions, areasByRegion, cafeCountByLocation]);
+
   const areaOptions = useMemo(() => {
     const source =
       filterMode === FILTER_MODES.AREA && selectedRegion
         ? areasByRegion[selectedRegion] ?? []
         : planningAreas.map((p) => p.PLN_AREA_N);
-    return [...new Set(source)].sort().map((a) => ({ value: a, label: toTitleCase(a) }));
-  }, [filterMode, selectedRegion, planningAreas, areasByRegion]);
+    return [...new Set(source)].sort().map((a) => ({ value: a, label: toTitleCase(a), count: cafeCountByLocation[a.toUpperCase()] || 0 }));
+  }, [filterMode, selectedRegion, planningAreas, areasByRegion, cafeCountByLocation]);
 
   const activeFilterLabel = selectedRegion || selectedArea;
 
@@ -78,9 +101,6 @@ export default function CafesPage() {
     () => (selectedRegion ? areasByRegion[selectedRegion] ?? [] : []),
     [selectedRegion, areasByRegion],
   );
-
-  const { data: cafes = [], isLoading, isError, error } = useGetCafes('');
-  const { mutate: deleteCafe, isPending: isDeleting } = useDeleteCafe();
 
   const filtered = useMemo(() => {
     let result = cafes;
@@ -233,7 +253,9 @@ export default function CafesPage() {
             label: (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>{toTitleCase(r)}</span>
-                <span style={{ fontSize: 11, color: '#9ca3af' }}>{areasByRegion[r]?.length ?? 0} areas</span>
+                {cafeCountByRegion[r] > 0 && (
+                  <span style={{ fontSize: 11, color: '#9ca3af' }}>{cafeCountByRegion[r]} {cafeCountByRegion[r] === 1 ? 'cafe' : 'cafes'}</span>
+                )}
               </div>
             ),
           }))}
@@ -248,6 +270,14 @@ export default function CafesPage() {
           showSearch
           optionFilterProp="label"
           options={areaOptions}
+          optionRender={(option) => (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>{option.data.label}</span>
+              {option.data.count > 0 && (
+                <span style={{ fontSize: 11, color: '#9ca3af' }}>{option.data.count} {option.data.count === 1 ? 'cafe' : 'cafes'}</span>
+              )}
+            </div>
+          )}
         />
       )}
 
