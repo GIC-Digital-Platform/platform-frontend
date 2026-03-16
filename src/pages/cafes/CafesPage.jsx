@@ -12,7 +12,7 @@ import { useSingaporePlanningAreas } from '../../hooks/useSingaporePlanningAreas
 function LogoCell({ value }) {
   return (
     <div className="logo-placeholder">
-      <img src={value || '/images/defaultLogo.jpg'} alt="logo" />
+      <img src={value || '../public/defaultLogo.jpg'} alt="logo" />
     </div>
   );
 }
