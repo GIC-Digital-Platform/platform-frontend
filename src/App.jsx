@@ -12,6 +12,7 @@ import CafesPage from './pages/cafes/CafesPage';
 import AddEditCafePage from './pages/cafes/AddEditCafePage';
 import EmployeesPage from './pages/employees/EmployeesPage';
 import AddEditEmployeePage from './pages/employees/AddEditEmployeePage';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 const { Sider, Content } = Layout;
 
@@ -81,6 +82,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
+    errorElement: <ErrorBoundary forRouter />,
     children: [
       { index: true, element: <Navigate to="/cafes" replace /> },
       { path: 'cafes', element: <CafesPage /> },
