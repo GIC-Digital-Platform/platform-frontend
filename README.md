@@ -2,7 +2,7 @@
 
 A React single-page application for managing café locations and their employees.
 
-**Live Demo**: [Try It Out](`https://cafe-frontend-cwte.onrender.com/`)
+**Live Demo**: [Try It Out](https://cafe-frontend-cwte.onrender.com/)
 
 ---
 
