@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Input, Modal, message, Spin, Alert, Popover, Select, Badge, Divider, Radio } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, FilterOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, FilterOutlined, EnvironmentOutlined, ArrowRightOutlined, ExportOutlined } from '@ant-design/icons';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
@@ -20,11 +20,13 @@ function LogoCell({ value }) {
 function EmployeeCountCell({ value, data, navigate }) {
   return (
     <button
+      className="employee-count-btn"
       style={{
+        position: 'relative',
         background: '#ffefda',
         border: 'none',
         borderRadius: 20,
-        padding: '4px 12px',
+        padding: '8px 15px',
         cursor: 'pointer',
         color: '#e8851a',
         fontWeight: 600,
@@ -169,24 +171,24 @@ export default function CafesPage() {
   const columnDefs = useMemo(
     () => [
       { headerName: 'Logo', field: 'logo', minWidth: 120, width: 120, sortable: false, filter: false, cellRenderer: LogoCell },
-      { headerName: 'Name', field: 'name', flex: 1, minWidth: 120 },
+      { headerName: 'Name', field: 'name', flex: 1, width: 100 },
       {
         headerName: 'Description',
         field: 'description',
         flex: 2,
         minWidth: 200,
-        cellStyle: {
-          color: '#6b7280',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        },
         tooltipField: 'description',
+        sortable: false,
+        cellRenderer: ({ value }) => (
+          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%', color: '#6b7280' }}>
+            {value}
+          </div>
+        ),
       },
       {
         headerName: 'Employees',
         field: 'employees',
-        minWidth: 100,
+        width: 150,
         sortable: true,
         cellRenderer: (params) => <EmployeeCountCell {...params} navigate={navigate} />,
       },
@@ -194,7 +196,8 @@ export default function CafesPage() {
         headerName: 'Location',
         field: 'location',
         flex: 1,
-        minWidth: 150,
+        width: 150,
+        sortable: false,
         cellRenderer: ({ value }) => (
           <span className="cafe-badge">
             <EnvironmentOutlined style={{ color: '#e8851a', marginRight: 6 }} />
@@ -353,16 +356,18 @@ export default function CafesPage() {
           </div>
         ) : (
           <>
-            <div className="ag-theme-alpine" style={{ height: 500 }}>
+            <div className="ag-theme-alpine" style={{ height: 500, overflow: 'hidden' }}>
               <AgGridReact
                 rowData={filtered}
                 columnDefs={columnDefs}
+                defaultColDef={{ resizable: false }}
                 suppressCellFocus
                 animateRows
                 pagination
                 paginationPageSize={10}
                 suppressPaginationPanel
                 onGridReady={(params) => params.api.sizeColumnsToFit()}
+                onGridSizeChanged={(params) => params.api.sizeColumnsToFit()}
               />
             </div>
             <div className="table-footer">

@@ -214,7 +214,7 @@ body {
   --ag-border-color: #f3f4f6;
   --ag-row-border-color: #f3f4f6;
   --ag-font-family: 'Inter', system-ui, sans-serif;
-  --ag-font-size: 14px;
+  --ag-font-size: 13px;
   --ag-cell-horizontal-padding: 20px;
   --ag-header-height: 48px;
   --ag-row-height: 80px;
@@ -225,8 +225,23 @@ body {
   border-bottom: 1px solid #f3f4f6 !important;
 }
 
+.ag-theme-alpine .ag-header-cell::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 50%;
+  width: 2px;
+  background-color: #e5e7eb;
+}
+
+.ag-theme-alpine .ag-header-cell:last-child::after {
+  display: none;
+}
+
 .ag-theme-alpine .ag-header-cell-text {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -235,6 +250,21 @@ body {
 
 .ag-theme-alpine .ag-row {
   border-bottom: 1px solid #f9fafb !important;
+}
+
+.employee-count-btn {
+  transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+}
+
+.employee-count-btn:hover {
+  background: #fde0b8 !important;
+  box-shadow: 0 2px 6px rgba(232, 133, 26, 0.2);
+}
+
+.employee-count-btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+  background: #f9d0a0 !important;
 }
 
 .ag-theme-alpine .ag-cell {

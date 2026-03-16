@@ -108,14 +108,14 @@ export default function EmployeesPage() {
       {
         headerName: 'Days Worked',
         field: 'days_worked',
-        width: 130,
+        width: 150,
         sortable: true,
       },
       {
         headerName: 'Café Name',
         field: 'cafe',
         flex: 1,
-        minWidth: 150,
+        width: 200,
         cellRenderer: CafeBadgeCell,
       },
       {
@@ -192,12 +192,14 @@ export default function EmployeesPage() {
               <AgGridReact
                 rowData={filtered}
                 columnDefs={columnDefs}
+                defaultColDef={{ resizable: false }}
                 suppressCellFocus
                 animateRows
                 pagination
                 paginationPageSize={10}
                 suppressPaginationPanel
                 onGridReady={(params) => params.api.sizeColumnsToFit()}
+                onGridSizeChanged={(params) => params.api.sizeColumnsToFit()}
               />
             </div>
             <div className="table-footer">
