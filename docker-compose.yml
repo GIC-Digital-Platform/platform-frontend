@@ -5,7 +5,7 @@ services:
     build:
       context: .
       args:
-        VITE_API_URL: http://localhost:4000
+        VITE_API_URL: ""
     container_name: cafe_frontend
     ports:
       - '3000:80'
@@ -23,6 +23,11 @@ services:
       PORT: 4000
       DATABASE_URL: postgresql://postgres:password@postgres:5432/cafe_db
       CORS_ORIGIN: http://localhost:3000
+      UPLOAD_DIR: uploads
+      MAX_FILE_SIZE: 2097152
+      CLOUDINARY_CLOUD_NAME: difdq7lmt
+      CLOUDINARY_API_KEY: 439844156628868
+      CLOUDINARY_API_SECRET: l3xvUz4UCw2ObsDMkTGrxOv_w4I
     ports:
       - '4000:4000'
     volumes:

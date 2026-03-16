@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: cafe-backend
+    runtime: docker
+    rootDir: ../platform-backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cafe-db
+          property: connectionString
+      - key: CORS_ORIGIN
+        value: https://cafe-frontend.onrender.com
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: MAX_FILE_SIZE
+        value: 2097152
+      - key: CLOUDINARY_CLOUD_NAME
+        value: difdq7lmt
+      - key: CLOUDINARY_API_KEY
+        value: 439844156628868
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+  - type: web
+    name: cafe-frontend
+    runtime: static
+    buildCommand: npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://cafe-backend.onrender.com
+
+databases:
+  - name: cafe-db
+    databaseName: cafe_db
+    user: postgres
+    plan: free
